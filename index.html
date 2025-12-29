@@ -157,7 +157,7 @@
                 <p class="text-gray-400 font-light">Discuss your ANZ growth roadmap with our team.</p>
             </div>
 
-            <form id="contactForm" class="space-y-12">
+            <form action="https://formspree.io/f/mlgezobg" method="POST" id="contactForm" class="space-y-12">
                 <div class="grid md:grid-cols-2 gap-12">
                     <div class="flex flex-col">
                         <label class="text-[10px] uppercase tracking-widest text-gray-500 mb-2">Name</label>
@@ -229,11 +229,35 @@
         const form = document.getElementById('contactForm');
         const successMessage = document.getElementById('successMessage');
 
-        form.addEventListener('submit', function(e) {
+        form.addEventListener('submit', async function(e) {
             e.preventDefault();
-            form.classList.add('hidden');
-            successMessage.classList.remove('hidden');
-            successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    form.classList.add('hidden');
+                    successMessage.classList.remove('hidden');
+                    successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    const data = await response.json();
+                    if (data.errors) {
+                        alert(data.errors.map(error => error.message).join(", "));
+                    } else {
+                        alert("Oops! There was a problem submitting your form");
+                    }
+                }
+            } catch (error) {
+                alert("Oops! There was a problem submitting your form");
+            }
         });
 
         function resetForm() {
